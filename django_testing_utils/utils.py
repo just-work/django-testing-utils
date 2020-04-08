@@ -1,4 +1,8 @@
+from typing import Any, List
 from unittest import mock
+
+# noinspection PyProtectedMember
+from unittest.mock import _patch
 
 # noinspection PyProtectedMember
 from django.test.utils import TestContextDecorator
@@ -16,7 +20,7 @@ class override_defaults(TestContextDecorator):
     """
     enable_exception = None
 
-    def __init__(self, app_name: str, **kwargs):
+    def __init__(self, app_name: str, **kwargs: Any):
         """ Save initial parameters.
 
         :param app_name: the application name
@@ -24,17 +28,17 @@ class override_defaults(TestContextDecorator):
         """
         self.app_name = app_name
         self.settings = kwargs
-        self.patchers = []
+        self.patchers: List[_patch] = []
         super().__init__()
 
-    def enable(self):
+    def enable(self) -> None:
         """ Create patchers, start save and start them. """
         for setting, value in self.settings.items():
             patcher = mock.patch(f'{self.app_name}.defaults.{setting}', value)
             self.patchers.append(patcher)
             patcher.start()
 
-    def disable(self):
+    def disable(self) -> None:
         """ Stop patchers. """
         for patcher in self.patchers:
             patcher.stop()
