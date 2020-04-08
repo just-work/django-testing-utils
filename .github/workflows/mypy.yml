@@ -20,7 +20,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requires.txt
           pip install mypy django-stubs
-      - name: Build and publish
+      - name: Run Mypy tests
         run: |
           mypy --config-file=mypy.ini django_testing_utils
 
