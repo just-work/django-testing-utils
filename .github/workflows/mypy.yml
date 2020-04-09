@@ -23,4 +23,3 @@ jobs:
       - name: Run Mypy tests
         run: |
           mypy --config-file=mypy.ini django_testing_utils
-
