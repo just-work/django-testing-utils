@@ -120,16 +120,30 @@ class MyTimeTestCase(BaseTestCase):
   is to reduce a number of rarely changed variables in django settings module by
   moving it to application-specific settings
   
+* `disable_patcher` - a context manager / decorator to temporarily disable 
+  some `unittest.patch` instances defined in TestCase instance. This breaks 
+  open/close principle but allows postponing tests refactoring when some 
+  mocks are too generic.  
+  
 ```python
 from django.test import TestCase
-from django_testing_utils.utils import override_defaults
-from testproject.testapp import defaults
-from testproject import testapp
+from django.utils import timezone
+from django_testing_utils.mixins import TimeMixin
+from django_testing_utils.utils import override_defaults, disable_patchers
+from testapp import defaults
+import testapp
 
-class MyTestCase(TestCase):
+class MyTestCase(TimeMixin, TestCase):
     
     @override_defaults(testapp.__name__, setting_1=42)
     def test_setting_value(self):
         self.assertEqual(defaults.setting_1, 42)
+        
+    @disable_patchers('now_patcher')
+    def test_real_time(self):
+        # now patcher from TimeMixin is now disabled
+        with disable_patchers(self.timezone_datetime_patcher):
+          # timezone.datetime patcher is not also disabled
+          self.assertNotEqual(timezone.now(), timezone.now())
 
 ```

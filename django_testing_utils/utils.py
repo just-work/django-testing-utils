@@ -1,4 +1,5 @@
-from typing import Any, List
+import functools
+from typing import Any, List, Union
 from unittest import mock
 
 from django.test import utils
@@ -24,8 +25,7 @@ class override_defaults(utils.TestContextDecorator):
         """
         self.app_name = app_name
         self.settings = kwargs
-        # noinspection PyUnresolvedReferences,PyProtectedMember
-        self.patchers: List[mock._patch] = []
+        self.patchers: List[mock.patch] = []
         super().__init__()
 
     def enable(self) -> None:
@@ -39,3 +39,45 @@ class override_defaults(utils.TestContextDecorator):
         """ Stop patchers. """
         for patcher in self.patchers:
             patcher.stop()
+
+
+# noinspection PyPep8Naming
+class disable_patchers:
+    """
+    Temporarily disables unittest.mock patchers defined in a TestCase instance,
+    or passed by value to a decorator/context manager.
+    """
+    def __init__(self, *patchers: Union[str, mock.patch]) -> None:
+        self.patchers = patchers
+
+    @staticmethod
+    def get(obj, name):
+        """ Gets a patcher instance from object by name, or patcher itself.
+        """
+        if isinstance(name, str):
+            return getattr(obj, name)
+        return name
+
+    def __call__(self, func):
+
+        @functools.wraps(func)
+        def inner(testcase, *args, **kwargs):
+            try:
+                for p in self.patchers:
+                    self.get(testcase, p).stop()
+
+                return func(testcase, *args, **kwargs)
+
+            finally:
+                for p in self.patchers:
+                    self.get(testcase, p).start()
+
+        return inner
+
+    def __enter__(self):
+        for p in self.patchers:
+            p.stop()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        for p in self.patchers:
+            p.start()
