@@ -1,6 +1,8 @@
 from django.test import SimpleTestCase
+from django.utils import timezone
 
-from django_testing_utils.utils import override_defaults
+from django_testing_utils.mixins import TimeMixin
+from django_testing_utils.utils import override_defaults, disable_patchers
 from testapp import defaults
 
 
@@ -30,3 +32,14 @@ class OverrideDefaultsTests(SimpleTestCase):
 
         self.assertEqual('original1', defaults.setting_1)
         self.assertEqual('original2', defaults.setting_2)
+
+
+class DisablePatchersTestCase(TimeMixin, SimpleTestCase):
+    @disable_patchers('now_patcher', 'timezone_datetime_patcher')
+    def test_disable_patcher_for_method(self):
+        self.assertNotEqual(timezone.now(), timezone.now())
+
+    def test_disable_patcher_as_context_manager(self):
+        self.assertEqual(timezone.now(), timezone.now())
+        with disable_patchers(self.now_patcher, self.timezone_datetime_patcher):
+            self.assertNotEqual(timezone.now(), timezone.now())
