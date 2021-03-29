@@ -75,6 +75,7 @@ WSGI_APPLICATION = 'testproject.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
+# noinspection PyUnresolvedReferences
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
