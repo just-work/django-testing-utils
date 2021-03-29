@@ -1,15 +1,11 @@
 from typing import Any, List
 from unittest import mock
 
-# noinspection PyProtectedMember
-from unittest.mock import _patch
-
-# noinspection PyProtectedMember
-from django.test.utils import TestContextDecorator
+from django.test import utils
 
 
 # noinspection PyPep8Naming
-class override_defaults(TestContextDecorator):
+class override_defaults(utils.TestContextDecorator):
     """
     A tool for convenient override default values in config files
 
@@ -28,7 +24,8 @@ class override_defaults(TestContextDecorator):
         """
         self.app_name = app_name
         self.settings = kwargs
-        self.patchers: List[_patch] = []
+        # noinspection PyUnresolvedReferences,PyProtectedMember
+        self.patchers: List[mock._patch] = []
         super().__init__()
 
     def enable(self) -> None:

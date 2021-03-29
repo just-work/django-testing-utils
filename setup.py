@@ -1,8 +1,9 @@
 import os
 import re
 import subprocess
-from setuptools import setup, find_packages  # type: ignore
 from pathlib import Path
+
+from setuptools import setup  # type: ignore
 
 with open('README.md') as f:
     long_description = f.read()
@@ -64,7 +65,7 @@ setup(
     long_description_content_type='text/markdown',
     packages=['django_testing_utils'],
     package_data={'django_testing_utils': ["py.typed"]},
-    url='https://github.com/just-work/django-test-utils',
+    url='https://github.com/just-work/django-testing-utils',
     license='MIT',
     author='Sergey Tikhonov',
     author_email='zimbler@gmail.com',
@@ -73,7 +74,7 @@ setup(
         'Django>=2.2,<3.2',
     ],
     classifiers=[
-        'Development Status :: 1 - Planning',
+        'Development Status :: 4 - Beta',
         'Environment :: Console',
         'Framework :: Django :: 2.2',
         'Framework :: Django :: 3.0',
