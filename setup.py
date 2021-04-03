@@ -71,7 +71,7 @@ setup(
     author_email='zimbler@gmail.com',
     description='Utils for Django admin testing',
     install_requires=[
-        'Django>=2.2,<3.2',
+        'Django>=2.1,<3.2',
     ],
     classifiers=[
         'Development Status :: 4 - Beta',
