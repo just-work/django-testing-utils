@@ -135,4 +135,4 @@ class BaseTestCase(TimeMixin, TestCase, metaclass=BaseTestCaseMeta):
             obj = self.reload(obj)
         for k, v in kwargs.items():
             value = getattr(obj, k)
-            self.assertEqual(value, v)
+            self.assertEqual(value, v, k)
