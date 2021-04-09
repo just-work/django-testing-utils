@@ -1,10 +1,14 @@
+from copy import deepcopy
 from datetime import timedelta, datetime
-from typing import TypeVar, Union, List, Tuple, Any, TYPE_CHECKING, Dict, cast
+from functools import wraps
+from typing import TypeVar, Union, Tuple, Any, TYPE_CHECKING, Dict, cast, Type
 from unittest import mock
 
 from django.db import models
 from django.test import TestCase
 from django.utils import timezone
+
+CREATED_OBJECTS = '_created_objects'
 
 second = timedelta(seconds=1)
 minute = timedelta(minutes=1)
@@ -61,6 +65,31 @@ class TimeMixin(TimeMixinTarget):
         return self.now
 
 
+def wrap_test_data(set_up_test_data: classmethod) -> classmethod:
+    """
+    This set_up_test_data backports Django-3.2 strategy of resetting state of objects
+    created in setUpTestData class set_up_test_data between tests.
+
+    It computes diff of TestCase class __dict__ before and after set_up_test_data call
+    and creates a deep copy of objects added in setUpTestData.
+    This copy is used to reset class attributes between tests.
+    """
+    func = set_up_test_data.__func__
+
+    @wraps(func)
+    def wrapper(cls: Type[TestCase]) -> None:
+        cache = getattr(cls, CREATED_OBJECTS)
+        before = cls.__dict__.copy()
+        func(cls)
+        after = cls.__dict__
+        for k, v in after.items():
+            if before.get(k) != v:
+                # attribute <k> was added or changed in setUpTestData, saving
+                cache[k] = v
+
+    return classmethod(wrapper)
+
+
 class BaseTestCaseMeta(type):
     """
     Metaclass for `BaseTestCases` to override `cls.__setattr__`.
@@ -73,23 +102,19 @@ class BaseTestCaseMeta(type):
 
     This metaclass intercepts adding new django model instances as cls members
     and collect it to created_objects list. This list is then used to reset
-    in-memory state by calling `refresh_from_db` in `setUp()`.
-
-
+    in-memory state from deep copy in `setUp()`.
     """
-    _created_objects: List[Tuple[int, models.Model]]
+    _created_objects: Dict[str, Any]
 
     def __new__(mcs, name: str, bases: Tuple[type, ...],
                 attrs: Dict[str, Any]) -> 'BaseTestCaseMeta':
         # Add created django model instances cache as class attribute
-        attrs['_created_objects'] = []
+        attrs[CREATED_OBJECTS] = {}
+        setup = attrs.get('setUpTestData')
+        if setup is not None:
+            attrs['setUpTestData'] = wrap_test_data(setup)
         instance = super().__new__(mcs, name, bases, attrs)
         return cast("BaseTestCaseMeta", instance)
-
-    def __setattr__(cls, key: str, value: Any) -> None:
-        if isinstance(value, models.Model):
-            cls._created_objects.append((value.pk, value))
-        return super().__setattr__(key, value)
 
 
 class BaseTestCase(TimeMixin, TestCase, metaclass=BaseTestCaseMeta):
@@ -101,17 +126,22 @@ class BaseTestCase(TimeMixin, TestCase, metaclass=BaseTestCaseMeta):
         Reset in-memory changed for django models that are stored as
         class attributes.
         """
-        for pk, obj in cls._created_objects:
-            obj.pk = pk
-            obj.refresh_from_db()
-            obj._state.fields_cache.clear()  # type: ignore
+        cache = getattr(cls, CREATED_OBJECTS)
+        for k, v in cache.items():
+            setattr(cls, k, deepcopy(v))
 
     @classmethod
     def forget_object(cls, obj: models.Model) -> None:
         """
         Method for removing django model instance from created objects cache
         """
-        cls._created_objects.remove((obj.pk, obj))
+        key = None
+        for k, v in cls._created_objects.items():
+            if type(v) is type(obj) and v.pk == obj.pk:
+                key = k
+                break
+        if key is not None:
+            del cls._created_objects[key]
 
     @staticmethod
     def update_object(obj: models.Model, *args: Any, **kwargs: Any) -> None:
@@ -135,4 +165,4 @@ class BaseTestCase(TimeMixin, TestCase, metaclass=BaseTestCaseMeta):
             obj = self.reload(obj)
         for k, v in kwargs.items():
             value = getattr(obj, k)
-            self.assertEqual(value, v)
+            self.assertEqual(value, v, k)
