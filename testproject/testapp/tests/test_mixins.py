@@ -2,13 +2,17 @@ from django_testing_utils import mixins
 from testapp import models
 
 
-class BaseTestCaseMetaTestCase(mixins.BaseTestCase):
-    """ Tests for base test case metaclass."""
+class MixinBaseTestCase(mixins.BaseTestCase):
 
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
         cls.project = models.Project.objects.create(name='initial')
+        cls.attr = 'a'
+
+
+class BaseTestCaseMetaTestCase(MixinBaseTestCase):
+    """ Tests for base test case metaclass."""
 
     def test_update_object(self):
         """ update_object updates object in database only"""
@@ -47,10 +51,18 @@ class BaseTestCaseMetaTestCase(mixins.BaseTestCase):
         in setUpTestData.
         """
         self.project.name = 'changed'
+        self.__class__.attr = 'b'
 
         self.refresh_objects()
 
         self.assertEqual(self.project.name, 'initial')
+        self.assertEqual(self.__class__.attr, 'a')
+
+
+class ForgetObjectTestCase(MixinBaseTestCase):
+    """
+    Checks removing saved class attribute from a list
+    """
 
     def test_forget_object(self):
         """
@@ -61,19 +73,18 @@ class BaseTestCaseMetaTestCase(mixins.BaseTestCase):
         self.forget_object(self.project)
 
         self.refresh_objects()
-        # self.project not reloaded from db, because it's removed from saved
-        # object list
+        # self.project not reset, because it's removed from saved object list
         self.assertEqual(self.project.name, 'changed')
 
 
-class SetUpTestDataResetTestCase(mixins.BaseTestCase):
+class SetUpTestDataResetTestCase(MixinBaseTestCase):
     """
     Ensures that objects created in setUpTestData are reset between tests
     """
 
     @classmethod
     def setUpTestData(cls) -> None:
-        cls.project = models.Project.objects.create(name='initial')
+        super().setUpTestData()
         cls.project2 = models.Project.objects.create(name='first')
 
     def test_1_change_something(self):
