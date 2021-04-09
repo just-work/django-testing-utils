@@ -1,12 +1,14 @@
 from copy import deepcopy
 from datetime import timedelta, datetime
 from functools import wraps
-from typing import TypeVar, Union, Tuple, Any, TYPE_CHECKING, Dict, cast
+from typing import TypeVar, Union, Tuple, Any, TYPE_CHECKING, Dict, cast, Type
 from unittest import mock
 
 from django.db import models
 from django.test import TestCase
 from django.utils import timezone
+
+CREATED_OBJECTS = '_created_objects'
 
 second = timedelta(seconds=1)
 minute = timedelta(minutes=1)
@@ -63,7 +65,7 @@ class TimeMixin(TimeMixinTarget):
         return self.now
 
 
-def wrap_test_data(set_up_test_data: classmethod):
+def wrap_test_data(set_up_test_data: classmethod) -> classmethod:
     """
     This set_up_test_data backports Django-3.2 strategy of resetting state of objects
     created in setUpTestData class set_up_test_data between tests.
@@ -75,14 +77,15 @@ def wrap_test_data(set_up_test_data: classmethod):
     func = set_up_test_data.__func__
 
     @wraps(func)
-    def wrapper(cls):
+    def wrapper(cls: Type[TestCase]) -> None:
+        cache = getattr(cls, CREATED_OBJECTS)
         before = cls.__dict__.copy()
         func(cls)
         after = cls.__dict__
         for k, v in after.items():
             if before.get(k) != v:
                 # attribute <k> was added or changed in setUpTestData, saving
-                cls._created_objects[k] = v
+                cache[k] = v
 
     return classmethod(wrapper)
 
@@ -106,7 +109,7 @@ class BaseTestCaseMeta(type):
     def __new__(mcs, name: str, bases: Tuple[type, ...],
                 attrs: Dict[str, Any]) -> 'BaseTestCaseMeta':
         # Add created django model instances cache as class attribute
-        attrs['_created_objects'] = {}
+        attrs[CREATED_OBJECTS] = {}
         setup = attrs.get('setUpTestData')
         if setup is not None:
             attrs['setUpTestData'] = wrap_test_data(setup)
@@ -123,7 +126,8 @@ class BaseTestCase(TimeMixin, TestCase, metaclass=BaseTestCaseMeta):
         Reset in-memory changed for django models that are stored as
         class attributes.
         """
-        for k, v in cls._created_objects.items():
+        cache = getattr(cls, CREATED_OBJECTS)
+        for k, v in cache.items():
             setattr(cls, k, deepcopy(v))
 
     @classmethod
