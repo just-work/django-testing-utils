@@ -8,7 +8,9 @@ from django.db import models
 from django.test import TestCase
 from django.utils import timezone
 
+SET_UP_TEST_DATA = 'setUpTestData'
 CREATED_OBJECTS = '_created_objects'
+RECORDS_OBJECTS = '_records_objects'
 
 second = timedelta(seconds=1)
 minute = timedelta(minutes=1)
@@ -110,9 +112,23 @@ class BaseTestCaseMeta(type):
                 attrs: Dict[str, Any]) -> 'BaseTestCaseMeta':
         # Add created django model instances cache as class attribute
         attrs[CREATED_OBJECTS] = {}
-        setup = attrs.get('setUpTestData')
+        setup = attrs.get(SET_UP_TEST_DATA)
+        if setup is None:
+            # if current class does not define setUpTestData class method, we'll
+            # take first one from base classes.
+            for base in bases:
+                try:
+                    setup = getattr(base, SET_UP_TEST_DATA)
+                except AttributeError:
+                    continue
+                else:
+                    break
         if setup is not None:
-            attrs['setUpTestData'] = wrap_test_data(setup)
+            # do not wrap same method more than once
+            if not hasattr(setup, RECORDS_OBJECTS):
+                setup = wrap_test_data(setup)
+                setattr(setup, RECORDS_OBJECTS, True)
+                attrs[SET_UP_TEST_DATA] = setup
         instance = super().__new__(mcs, name, bases, attrs)
         return cast("BaseTestCaseMeta", instance)
 
