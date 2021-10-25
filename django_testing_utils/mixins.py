@@ -137,7 +137,7 @@ class BaseTestCase(TimeMixin, TestCase, metaclass=BaseTestCaseMeta):
     """ Base class for django tests."""
 
     @staticmethod
-    def clone_object(obj, **kwargs):
+    def clone_object(obj: M, **kwargs) -> M:
         """ Clones a django model instance."""
         obj = deepcopy(obj)
         obj.pk = None
