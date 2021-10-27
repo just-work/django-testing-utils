@@ -1,3 +1,7 @@
+import io
+
+from django.core.files.uploadedfile import SimpleUploadedFile
+
 from django_testing_utils import mixins
 from testapp import models
 
@@ -8,6 +12,15 @@ class MixinBaseTestCase(mixins.BaseTestCase):
     def setUpTestData(cls):
         super().setUpTestData()
         cls.project = models.Project.objects.create(name='initial')
+        cls.task = models.Task.objects.create(
+            name='initial',
+            project=cls.project,
+            attachment=SimpleUploadedFile(
+                name='filename.txt',
+                content=io.BytesIO().getvalue()
+            ),
+            visible=False
+        )
         cls.attr = 'a'
 
 
@@ -21,6 +34,17 @@ class BaseTestCaseMetaTestCase(MixinBaseTestCase):
         self.assertEqual(self.project.name, 'initial')
         self.project.refresh_from_db()
         self.assertEqual(self.project.name, 'modified')
+
+    def test_clone_object(self):
+        """ clones and returns a new object from db"""
+        cloned_task = self.clone_object(self.task, name='unique name')
+
+        self.assertNotEqual(self.task.pk, cloned_task.pk)
+        self.assertEqual(self.task.project, cloned_task.project)
+        self.assertNotEqual(self.task.name, cloned_task.name)
+        self.assertEqual(cloned_task.name, 'unique name')
+        self.assertEqual(self.task.visible, cloned_task.visible)
+        self.assertEqual(self.task.attachment, cloned_task.attachment)
 
     def test_reload(self):
         """ reload fetches actual object version from db."""
