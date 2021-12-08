@@ -1,5 +1,4 @@
-class TestCase(object):
-passDjango-testing-utils
+Django-testing-utils
 ==================
 
 Django-Testing-Utils is a package providing test helpers for django app testing.
