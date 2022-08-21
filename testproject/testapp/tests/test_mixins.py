@@ -1,12 +1,15 @@
 import io
 
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.utils import timezone
+from django.utils.timezone import now as tested_now
 
 from django_testing_utils import mixins
 from testapp import models
 
 
 class MixinBaseTestCase(mixins.BaseTestCase):
+    project: models.Project
 
     @classmethod
     def setUpTestData(cls):
@@ -127,3 +130,12 @@ class SetUpTestDataResetTestCase(MixinBaseTestCase):
         """
         self.assertEqual(self.project.name, 'initial')
         self.assertEqual(self.project2.name, 'first')
+
+
+class TimeMixinTestCase(mixins.BaseTestCase):
+
+    def test_timezone_now(self):
+        self.assertEqual(timezone.now(), self.now)
+
+    def test_timezone_datetime_now(self):
+        self.assertEqual(tested_now(), self.now)

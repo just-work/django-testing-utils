@@ -34,6 +34,10 @@ class MockedDateTime(datetime):
     def utcnow(cls):  # type: ignore
         # noinspection PyUnresolvedReferences
         return timezone.utc.normalize(timezone.now())
+    #
+    # @classmethod
+    # def now(cls, tz=None):
+    #     return timezone.now().astimezone(tz)
 
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -49,22 +53,33 @@ class TimeMixin(TimeMixinTarget):
     def setUp(self) -> None:
         super().setUp()
         self.now = timezone.now()
+        # timezone.now() is recommended way to access current datetime.
         self.now_patcher = mock.patch('django.utils.timezone.now',
                                       side_effect=self.get_now)
         self.now_patcher.start()
 
+        # datetime is an imported C-extension, so it must be replaces
+        # completely.
         self.timezone_datetime_patcher = mock.patch(
             'django.utils.timezone.datetime',
             new_callable=mock.PropertyMock(return_value=MockedDateTime))
         self.timezone_datetime_patcher.start()
+        # timezone.datetime.now() is in closure for timezone.now(), and to
+        # make it work with now() method imported to another modules we need
+        # to mock MockedDateTime.now also.
+        self.timezone_datetime_now_patcher = mock.patch(
+            'django.utils.timezone.datetime.now',
+            side_effect=self.get_now)
+        self.timezone_datetime_now_patcher.start()
 
     def tearDown(self) -> None:
         super().tearDown()
+        self.timezone_datetime_now_patcher.stop()
         self.timezone_datetime_patcher.stop()
         self.now_patcher.stop()
 
-    def get_now(self) -> datetime:
-        return self.now
+    def get_now(self, tz=None) -> datetime:
+        return self.now.astimezone(tz)
 
 
 def wrap_test_data(set_up_test_data: classmethod) -> classmethod:
