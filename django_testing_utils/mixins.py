@@ -1,7 +1,8 @@
 from copy import deepcopy
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, tzinfo
 from functools import wraps
-from typing import TypeVar, Union, Tuple, Any, TYPE_CHECKING, Dict, cast, Type
+from typing import TypeVar, Union, Tuple, Any, TYPE_CHECKING, Dict, cast, Type, \
+    Optional
 from unittest import mock
 
 from django.db import models
@@ -74,7 +75,7 @@ class TimeMixin(TimeMixinTarget):
         self.timezone_datetime_patcher.stop()
         self.now_patcher.stop()
 
-    def get_now(self, tz=None) -> datetime:
+    def get_now(self, tz: Optional[tzinfo] = None) -> datetime:
         return self.now.astimezone(tz)
 
 
