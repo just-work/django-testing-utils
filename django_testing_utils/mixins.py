@@ -34,10 +34,6 @@ class MockedDateTime(datetime):
     def utcnow(cls):  # type: ignore
         # noinspection PyUnresolvedReferences
         return timezone.utc.normalize(timezone.now())
-    #
-    # @classmethod
-    # def now(cls, tz=None):
-    #     return timezone.now().astimezone(tz)
 
 
 if TYPE_CHECKING:  # pragma: no cover
