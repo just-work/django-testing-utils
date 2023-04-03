@@ -71,7 +71,7 @@ setup(
     author_email='zimbler@gmail.com',
     description='Utils for Django admin testing',
     install_requires=[
-        'Django>=2.1,<4.2',
+        'Django>=2.1,<4.3',
     ],
     classifiers=[
         'Development Status :: 4 - Beta',
@@ -83,6 +83,7 @@ setup(
         'Framework :: Django :: 3.2',
         'Framework :: Django :: 4.0',
         'Framework :: Django :: 4.1',
+        'Framework :: Django :: 4.2',
         'Operating System :: POSIX',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
