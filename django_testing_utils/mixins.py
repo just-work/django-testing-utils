@@ -186,12 +186,12 @@ class BaseTestCase(TimeMixin, TestCase, metaclass=BaseTestCaseMeta):
         """ Update django model object in database only."""
         args_iter = iter(args)
         kwargs.update(dict(zip(args_iter, args_iter)))
-        obj._meta.model.objects.filter(pk=obj.pk).update(**kwargs)
+        obj._meta.model.objects.filter(pk=obj.pk).update(**kwargs)  # type: ignore[attr-defined]
 
     @staticmethod
     def reload(obj: M) -> M:
         """ Fetch same object from database."""
-        return obj._meta.model.objects.get(pk=obj.pk)
+        return obj._meta.model.objects.get(pk=obj.pk)  # type: ignore[attr-defined]
 
     def setUp(self) -> None:
         self.refresh_objects()
