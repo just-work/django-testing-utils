@@ -13,6 +13,8 @@ jobs:
       run: |
         pip install -r requirements.txt
         pip install coverage
+        coverage run testproject/manage.py test testproject/
+        coverage xml
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v2
       with:
