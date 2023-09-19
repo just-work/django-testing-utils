@@ -55,6 +55,7 @@ def get_version():
         except FileNotFoundError:
             version = None
 
+    print(version)
     return version
 
 
