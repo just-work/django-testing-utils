@@ -55,13 +55,12 @@ def get_version():
         except FileNotFoundError:
             version = None
 
-    print(version)
     return version
 
 
 setup(
     name=package_name,
-    version=get_version() or 'dev',
+    version=get_version() or 'dev1',
     long_description=long_description,
     long_description_content_type='text/markdown',
     packages=['django_testing_utils'],
