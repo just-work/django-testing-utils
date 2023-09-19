@@ -6,17 +6,15 @@ jobs:
     steps:
     - uses: actions/checkout@master
     - name: Setup Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@master
       with:
         python-version: '3.x'
     - name: Generate coverage report
       run: |
         pip install -r requirements.txt
         pip install coverage
-        pip install -q -e .
-        pip list
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v2
+      uses: codecov/codecov-action@master
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         file: ./coverage.xml
