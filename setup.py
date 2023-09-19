@@ -60,7 +60,7 @@ def get_version():
 
 setup(
     name=package_name,
-    version=get_version() or 'dev1',
+    version=get_version() or '0.0.0.dev1',
     long_description=long_description,
     long_description_content_type='text/markdown',
     packages=['django_testing_utils'],
