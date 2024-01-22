@@ -191,7 +191,7 @@ class BaseTestCase(TimeMixin, TestCase, metaclass=BaseTestCaseMeta):
     @staticmethod
     def reload(obj: M) -> M:
         """ Fetch same object from database."""
-        return obj._meta.model.objects.get(pk=obj.pk)  # type: ignore[attr-defined]
+        return obj._meta.model.objects.get(pk=obj.pk)
 
     def setUp(self) -> None:
         self.refresh_objects()

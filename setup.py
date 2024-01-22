@@ -85,11 +85,11 @@ setup(
         'Framework :: Django :: 4.1',
         'Framework :: Django :: 4.2',
         'Operating System :: POSIX',
-        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
         'Topic :: Software Development :: Testing',
     ]
 )
