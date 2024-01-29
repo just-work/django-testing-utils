@@ -186,11 +186,15 @@ class BaseTestCase(TimeMixin, TestCase, metaclass=BaseTestCaseMeta):
         """ Update django model object in database only."""
         args_iter = iter(args)
         kwargs.update(dict(zip(args_iter, args_iter)))
+        # NOBUG mypy error "type[Model]" has no attribute "objects"
+        # ISSUE https://github.com/just-work/django-testing-utils/issues/67
         obj._meta.model.objects.filter(pk=obj.pk).update(**kwargs)  # type: ignore[attr-defined]
 
     @staticmethod
     def reload(obj: M) -> M:
         """ Fetch same object from database."""
+        # NOBUG mypy error "type[Model]" has no attribute "objects"
+        # ISSUE https://github.com/just-work/django-testing-utils/issues/67
         return obj._meta.model.objects.get(pk=obj.pk)  # type: ignore[attr-defined]
 
     def setUp(self) -> None:
