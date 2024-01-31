@@ -60,7 +60,7 @@ def get_version():
 
 setup(
     name=package_name,
-    version=get_version() or 'dev',
+    version=get_version() or '0.0.0.dev1',
     long_description=long_description,
     long_description_content_type='text/markdown',
     packages=['django_testing_utils'],
@@ -71,7 +71,7 @@ setup(
     author_email='zimbler@gmail.com',
     description='Utils for Django admin testing',
     install_requires=[
-        'Django>=2.1,<4.2',
+        'Django>=2.1,<4.3',
     ],
     classifiers=[
         'Development Status :: 4 - Beta',
@@ -83,12 +83,13 @@ setup(
         'Framework :: Django :: 3.2',
         'Framework :: Django :: 4.0',
         'Framework :: Django :: 4.1',
+        'Framework :: Django :: 4.2',
         'Operating System :: POSIX',
-        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
         'Topic :: Software Development :: Testing',
     ]
 )
