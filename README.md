@@ -27,21 +27,22 @@ refresh_from_db() when necessary. It also clears fields_cache for such objects.
 
 ```python
 from django_testing_utils import mixins
-from testapp import models
+from testproject.testapp import models
+
 
 class SomeTestCase(mixins.BaseTestCase):
-    """ Some test case that uses django models."""
+  """ Some test case that uses django models."""
 
-    @classmethod
-    def setUpTestData(cls):
-        super().setUpTestData()
-        # In large code django docs recommend to create common objects in 
-        # this method to speedup tests setup by reusing objects in db.
-        cls.project = models.Project.objects.create(name='project')
+  @classmethod
+  def setUpTestData(cls):
+    super().setUpTestData()
+    # In large code django docs recommend to create common objects in 
+    # this method to speedup tests setup by reusing objects in db.
+    cls.project = models.Project.objects.create(name='project')
 
-    def test_something(self):
-        # in this test self.project instance is independent from other tests
-        ...
+  def test_something(self):
+    # in this test self.project instance is independent from other tests
+    ...
 
 ```
 

@@ -5,7 +5,7 @@ from django.utils import timezone
 from django.utils.timezone import now as tested_now
 
 from django_testing_utils import mixins
-from testapp import models
+from testproject.testapp import models
 
 
 class MixinBaseTestCase(mixins.BaseTestCase):
