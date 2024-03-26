@@ -108,6 +108,7 @@ class SetUpTestDataResetTestCase(MixinBaseTestCase):
     """
     Ensures that objects created in setUpTestData are reset between tests
     """
+    project2: models.Project
 
     @classmethod
     def setUpTestData(cls) -> None:
