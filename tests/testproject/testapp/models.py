@@ -1,4 +1,4 @@
-from django.contrib.auth import get_user_model
+from django.contrib.auth.models import User
 from django.contrib.contenttypes import fields
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
@@ -15,7 +15,7 @@ class Tag(models.Model):
 class Project(models.Model):
     pid = models.AutoField(primary_key=True)
     name = models.CharField(max_length=10, unique=True)
-    members = models.ManyToManyField(get_user_model(), blank=True)
+    members = models.ManyToManyField(User, blank=True)
     tags = fields.GenericRelation(Tag)
 
 

@@ -5,7 +5,7 @@ from django.utils import timezone
 from django.utils.timezone import now as tested_now
 
 from django_testing_utils import mixins
-from testapp import models
+from testproject.testapp import models
 
 
 class MixinBaseTestCase(mixins.BaseTestCase):
@@ -108,6 +108,7 @@ class SetUpTestDataResetTestCase(MixinBaseTestCase):
     """
     Ensures that objects created in setUpTestData are reset between tests
     """
+    project2: models.Project
 
     @classmethod
     def setUpTestData(cls) -> None:
